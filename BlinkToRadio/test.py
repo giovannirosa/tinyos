@@ -19,15 +19,17 @@ for line in noise:
   str1 = line.strip()
   if str1:
     val = int(str1)
-    for i in range(1, 3):
+    for i in range(0, 4):
       t.getNode(i).addNoiseTraceReading(val)
 
-for i in range(1, 3):
+for i in range(0, 4):
   print "Creating noise model for ",i
   t.getNode(i).createNoiseModel()
 
-t.getNode(1).bootAtTime(100001)
-t.getNode(2).bootAtTime(800008)
+t.getNode(0).bootAtTime(100001)
+t.getNode(1).bootAtTime(400002)
+t.getNode(2).bootAtTime(600003)
+t.getNode(3).bootAtTime(800004)
 
 for i in range(100):
   t.runNextEvent()

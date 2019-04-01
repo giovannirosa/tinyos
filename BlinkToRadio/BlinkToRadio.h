@@ -8,6 +8,7 @@ enum {
 
 typedef nx_struct BlinkToRadioMsg {
   nx_uint16_t nodeid;
+  nx_uint8_t msg[16];
   nx_uint16_t counter;
 } BlinkToRadioMsg;
 

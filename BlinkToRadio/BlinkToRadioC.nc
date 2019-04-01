@@ -1,4 +1,5 @@
 #include <Timer.h>
+#include <string.h>
 #include "BlinkToRadio.h"
 
 module BlinkToRadioC {
@@ -40,6 +41,8 @@ implementation {
       BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
       btrpkt->nodeid = TOS_NODE_ID;
       btrpkt->counter = counter;
+      // char m[16] = {'H','E','L','L','O','W','O','R','L','D','A','E','S','1','2','8'};
+      strcpy(btrpkt->msg, "HelloWorldAES128");
       if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
         dbg("BlinkToRadioC", "BlinkToRadioC: packet sent.\n", counter);	
         busy = TRUE;
@@ -58,6 +61,7 @@ implementation {
     dbg("BlinkToRadioC", "Received packet of length %hhu.\n", len);
     if (len == sizeof(BlinkToRadioMsg)) {
       BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
+      dbg("BlinkToRadioC", "Received message: %s.\n", btrpkt->msg);
       call Leds.set(btrpkt->counter);
     }
     return msg;
