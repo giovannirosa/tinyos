@@ -1,5 +1,7 @@
 #include <Timer.h>
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 #include "BlinkToRadio.h"
 
 module BlinkToRadioC {
@@ -17,10 +19,13 @@ implementation {
   bool busy = FALSE;
   message_t pkt;
   uint16_t counter = 0;
+  MsgStore store;
+  uint8_t i;
 
   event void Boot.booted() {
     dbg("BlinkToRadioC", "Application booted.\n");
     call AMControl.start();
+    srand(time(NULL));
   }
 
   event void AMControl.startDone(error_t err) {
@@ -37,12 +42,12 @@ implementation {
   event void Timer0.fired() {
     counter++;
     dbg("BlinkToRadioC", "BlinkToRadioC: timer fired, counter is %hu.\n", counter);
-    if (!busy) {
+    if (!busy && TOS_NODE_ID != 0) {
       BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
       btrpkt->nodeid = TOS_NODE_ID;
       btrpkt->counter = counter;
-      // char m[16] = {'H','E','L','L','O','W','O','R','L','D','A','E','S','1','2','8'};
       strcpy(btrpkt->msg, "HelloWorldAES128");
+      btrpkt->temp = (rand() % (30 - 10 + 1)) + 10;;
       if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
         dbg("BlinkToRadioC", "BlinkToRadioC: packet sent.\n", counter);	
         busy = TRUE;
@@ -61,8 +66,17 @@ implementation {
     dbg("BlinkToRadioC", "Received packet of length %hhu.\n", len);
     if (len == sizeof(BlinkToRadioMsg)) {
       BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
-      dbg("BlinkToRadioC", "Received message: %s.\n", btrpkt->msg);
+      dbg("BlinkToRadioC", "Received message: %s with temp %d from node %d.\n", btrpkt->msg, btrpkt->temp, btrpkt->nodeid);
       call Leds.set(btrpkt->counter);
+      if (TOS_NODE_ID == 0) {
+        strcpy(store.msg[store.counter], btrpkt->msg);
+        store.temp[store.counter] = btrpkt->temp;
+        store.counter++;
+        dbg("BlinkToRadioC", "Store(%d):\n", store.counter);
+        for (i = 0; i < store.counter; ++i) {
+          dbg("BlinkToRadioC", "%s | %d\n", store.msg[i], store.temp[i]);
+        }
+      }
     }
     return msg;
   }
