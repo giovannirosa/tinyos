@@ -32,3 +32,7 @@ Existe um makefile em cada diretório com os seguintes comandos disponíveis:
 ## Licença
 
 Código aberto, qualquer um pode usar para qualquer propósito.
+
+## Topologia BlinkToRadio
+
+![topologia de 5 nós, com um ao centro como hub para os outros 4](https://github.com/giovannirosa/tinyos/blob/master/BlinkToRadio/network.png)
